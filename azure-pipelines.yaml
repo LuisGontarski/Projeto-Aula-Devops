@@ -1,0 +1,26 @@
+pool:
+  name: Arm64
+  vmImage: 'ubuntu-20.04'
+
+trigger:
+  branches:
+    include:
+      - main
+
+resources:
+  - repo: self
+
+stages:
+  - stage: Build
+    displayName: Build stage
+    jobs:
+      - job: Build
+        displayName: Build
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'Projeto-Aula-Devops-Docker'
+              repository: 'luisgontarski/projeto-aula-devops'
+              command: 'buildAndPush'
+              tags: '$(Build.BuildId)'
+              Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
