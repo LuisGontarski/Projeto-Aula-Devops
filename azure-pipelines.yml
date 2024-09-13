@@ -20,7 +20,7 @@ stages:
     - task: Docker@2
       inputs:
         containerRegistry: 'DockerConnection'
-        repository: 'IGDSCI/BACKEND-CRUD'
+        repository: 'LuisGontarski/Projeto-Aula-Devops'
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
