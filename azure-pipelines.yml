@@ -35,7 +35,7 @@ stages:
 
     - task: Docker@2
       inputs:
-        containerRegistry: 'Projeto-Aula-Devops-Docker'
+        containerRegistry: 'projeto-aula-devops-docker'
         command: 'login'
 
     - script: |
