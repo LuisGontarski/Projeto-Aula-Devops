@@ -6,6 +6,7 @@ pool:
 
 resources:
   - repo: self
+
 variables:
   imagePullSecret: 'regcred'
 
@@ -24,3 +25,24 @@ stages:
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+
+- stage: Deploy
+  displayName: Deploy stage
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    steps:
+
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'Projeto-Aula-Devops-Docker'
+        repository: 'LuisGontarski/Projeto-Aula-Devops'
+        command: 'login'
+    
+    - script: |
+        # Puxar a imagem Docker do registro
+        docker pull Projeto-Aula-Devops-Docker.azurecr.io/LuisGontarski/Projeto-Aula-Devops:$(Build.BuildId)
+
+        # Rodar o container da imagem
+        docker run -d -p 8080:80 Projeto-Aula-Devops-Docker.azurecr.io/LuisGontarski/Projeto-Aula-Devops:$(Build.BuildId)
+      displayName: 'Pull and Run Docker container'
