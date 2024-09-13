@@ -1,29 +1,26 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
 - main
 
-resources:
-- repo: self
+pool:
+  vmImage: ubuntu-latest
 
+resources:
+  - repo: self
 variables:
-  tag: '$(Build.BuildId)'
+  imagePullSecret: 'regcred'
 
 stages:
 - stage: Build
-  displayName: Build image
+  displayName: Build stage
   jobs:
   - job: Build
     displayName: Build
-    pool:
-      vmImage: ubuntu-latest
     steps:
+   
     - task: Docker@2
-      displayName: Build an image
       inputs:
-        command: build
-        dockerfile: '**/Dockerfile'
-        tags: |
-          $(tag)
+        containerRegistry: 'DockerConnection'
+        repository: 'IGDSCI/BACKEND-CRUD'
+        command: 'buildAndPush'
+        tags: '$(Build.BuildId)'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
