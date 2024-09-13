@@ -20,8 +20,8 @@ stages:
    
     - task: Docker@2
       inputs:
-        containerRegistry: 'Projeto-Aula-Devops-Docker'
-        repository: 'luisgontarski/projeto-aula-devops' 
+        containerRegistry: 'projeto-aula-devops-docker'
+        repository: 'luisgontarski/projeto-aula-devops'
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
@@ -36,9 +36,8 @@ stages:
     - task: Docker@2
       inputs:
         containerRegistry: 'Projeto-Aula-Devops-Docker'
-        repository: 'luisgontarski/projeto-aula-devops' 
         command: 'login'
-    
+
     - script: |
         # Puxar a imagem Docker do registro
         docker pull projeto-aula-devops-docker.azurecr.io/luisgontarski/projeto-aula-devops:$(Build.BuildId)
