@@ -19,7 +19,7 @@ stages:
    
     - task: Docker@2
       inputs:
-        containerRegistry: 'DockerConnection'
+        containerRegistry: 'CRUD'
         repository: 'LuisGontarski/Projeto-Aula-Devops'
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
