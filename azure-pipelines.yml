@@ -21,7 +21,7 @@ stages:
     - task: Docker@2
       inputs:
         containerRegistry: 'Projeto-Aula-Devops-Docker'
-        repository: 'LuisGontarski/Projeto-Aula-Devops'
+        repository: 'luisgontarski/projeto-aula-devops' 
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
@@ -36,13 +36,13 @@ stages:
     - task: Docker@2
       inputs:
         containerRegistry: 'Projeto-Aula-Devops-Docker'
-        repository: 'LuisGontarski/Projeto-Aula-Devops'
+        repository: 'luisgontarski/projeto-aula-devops' 
         command: 'login'
     
     - script: |
         # Puxar a imagem Docker do registro
-        docker pull Projeto-Aula-Devops-Docker.azurecr.io/LuisGontarski/Projeto-Aula-Devops:$(Build.BuildId)
+        docker pull projeto-aula-devops-docker.azurecr.io/luisgontarski/projeto-aula-devops:$(Build.BuildId)
 
         # Rodar o container da imagem
-        docker run -d -p 8080:80 Projeto-Aula-Devops-Docker.azurecr.io/LuisGontarski/Projeto-Aula-Devops:$(Build.BuildId)
+        docker run -d -p 8080:80 projeto-aula-devops-docker.azurecr.io/luisgontarski/projeto-aula-devops:$(Build.BuildId)
       displayName: 'Pull and Run Docker container'
