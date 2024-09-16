@@ -25,23 +25,3 @@ stages:
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-
-- stage: Deploy
-  displayName: Deploy stage
-  jobs:
-  - job: Deploy
-    displayName: Deploy
-    steps:
-
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'projeto-aula-devops-docker'
-        command: 'login'
-
-    - script: |
-        # Puxar a imagem Docker do registro
-        docker pull projeto-aula-devops-docker.azurecr.io/luisgontarski/projeto-aula-devops:$(Build.BuildId)
-
-        # Rodar o container da imagem
-        docker run -d -p 8080:80 projeto-aula-devops-docker.azurecr.io/luisgontarski/projeto-aula-devops:$(Build.BuildId)
-      displayName: 'Pull and Run Docker container'
