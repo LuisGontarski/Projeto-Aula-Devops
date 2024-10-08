@@ -9,6 +9,7 @@ resources:
 
 variables:
   imagePullSecret: 'regcred'
+  containerName: 'crud-cloud'
 
 stages:
 - stage: Build
@@ -17,7 +18,6 @@ stages:
   - job: Build
     displayName: Build
     steps:
-   
     - task: Docker@2
       inputs:
         containerRegistry: 'projeto-aula-devops-docker'
@@ -25,3 +25,8 @@ stages:
         command: 'buildAndPush'
         tags: '$(Build.BuildId)'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+
+    # Criar o container para o BFF com o nome crud-cloud
+    - script: |
+        docker run --name $(containerName) -d luisgontarski/projeto-aula-devops:$(Build.BuildId)
+      displayName: 'Run BFF container crud-cloud'
