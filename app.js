@@ -1,84 +1,72 @@
-// app.js
 const express = require('express');
+const axios = require('axios');
+const sql = require('mssql');
 const app = express();
-const pool = require('./db');
 
+// Middleware para analisar JSON no corpo da requisição
 app.use(express.json());
 
-// Criar uma nova reserva
-app.post('/reservas', async (req, res) => {
-  try {
-    const { cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status } = req.body;
-
-    const novaReserva = await pool.query(
-      `INSERT INTO reservas (cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status) 
-       VALUES($1, $2, $3, $4, $5, $6) 
-       RETURNING *`,
-      [cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status]
-    );
-
-    res.json(novaReserva.rows[0]);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: 'Erro ao criar a reserva' });
-  }
-});
-
-
-// Listar todas as reservas
-app.get('/reservas', async (req, res) => {
-  try {
-    const todasReservas = await pool.query("SELECT * FROM reservas");
-    res.json(todasReservas.rows);
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-// Atualizar uma reserva
-app.put('/reservas/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status } = req.body;
-
-    const atualizarReserva = await pool.query(
-      `UPDATE reservas 
-       SET cliente_id = $1, vaga_id = $2, data_reserva = $3, 
-           data_inicio = $4, data_fim = $5, status = $6 
-       WHERE reserva_id = $7`,
-      [cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status, id]
-    );
-
-    if (atualizarReserva.rowCount > 0) {
-      res.json("Reserva atualizada com sucesso!");
-    } else {
-      res.status(404).json({ message: "Reserva não encontrada" });
+// Configuração da conexão com o banco de dados SQL
+const dbConfig = {
+    user: process.env.SQL_USER,
+    password: process.env.SQL_PASSWORD,
+    server: process.env.SQL_SERVER,
+    database: process.env.SQL_DATABASE,
+    options: {
+        encrypt: true,
+        trustServerCertificate: false
     }
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Erro ao atualizar a reserva" });
-  }
-});
+};
 
+// URL da Azure Function e Microsserviço
+const AZURE_FUNCTION_URL = 'https://7n2b14zsc7.execute-api.us-east-2.amazonaws.com/lambda';
+const MICROSERVICE_URL = 'https://crud-croud.internal.wonderfulsmoke-a37fd7b3.australiaeast.azurecontainerapps.io';
 
-// Deletar uma reserva
-app.delete('/reservas/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletarReserva = await pool.query("DELETE FROM reservas WHERE reserva_id = $1", [id]);
-
-    if (deletarReserva.rowCount > 0) {
-      res.json("Reserva deletada com sucesso!");
-    } else {
-      res.status(404).json({ message: "Reserva não encontrada" });
+// Conectar ao banco de dados
+const connectToDb = async () => {
+    try {
+        await sql.connect(dbConfig);
+        console.log('Conectado ao banco de dados');
+    } catch (err) {
+        console.error('Erro ao conectar ao banco de dados:', err);
     }
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Erro ao deletar a reserva" });
-  }
+};
+
+// Rota para lidar com requisições de reservas
+app.get('/api/reservas', async (req, res) => {
+    try {
+        const result = await sql.query`SELECT * FROM reservas`;
+        res.json(result.recordset);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao buscar reservas' });
+    }
 });
 
+// Rota do BFF para fazer requisições para o microsserviço e Azure Function
+app.get('/api/bff', async (req, res) => {
+    try {
+        // Requisição para o microsserviço
+        const microserviceResponse = await axios.get(`${MICROSERVICE_URL}/reservas`);
+        
+        // Requisição para a Azure Function
+        const azureFunctionResponse = await axios.get(AZURE_FUNCTION_URL);
 
-app.listen(5000, () => {
-  console.log('Servidor rodando na porta 5000');
+        // Resposta agregada para o frontend
+        const responseData = {
+            reservas: microserviceResponse.data,
+            functionData: azureFunctionResponse.data
+        };
+
+        res.status(200).json(responseData);
+    } catch (error) {
+        console.error('Erro no BFF:', error);
+        res.status(500).json({ error: 'Erro ao agregar dados do BFF' });
+    }
+});
+
+// Inicializar o servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`BFF rodando na porta ${PORT}`);
+    connectToDb();  // Conectar ao banco de dados quando iniciar o servidor
 });

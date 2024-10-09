@@ -1,5 +1,5 @@
 trigger:
-- main
+  - main
 
 pool:
   vmImage: ubuntu-latest
@@ -8,25 +8,43 @@ resources:
   - repo: self
 
 variables:
-  imagePullSecret: 'regcred'
-  containerName: 'crud-cloud'
+  imagePullSecret: 'regcred'  # Nome do pull secret do seu container registry
+  containerName: 'crud-cloud'  # Nome do container que será criado
+  containerRegistry: 'projeto-aula-devops-docker'  # Nome do registro de containers
+  imageName: 'luisgontarski/projeto-aula-devops'  # Nome da imagem
+  imageTag: '$(Build.BuildId)'  # Tag da imagem gerada no build
 
 stages:
 - stage: Build
   displayName: Build stage
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Build and Push Docker Image
     steps:
     - task: Docker@2
       inputs:
-        containerRegistry: 'projeto-aula-devops-docker'
-        repository: 'luisgontarski/projeto-aula-devops'
+        containerRegistry: $(containerRegistry)
+        repository: $(imageName)
         command: 'buildAndPush'
-        tags: '$(Build.BuildId)'
+        tags: '$(imageTag)'  # Tagging the image with the build ID
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)'  # Ensure Docker build context is correct
 
-    # Criar o container para o BFF com o nome crud-cloud
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  jobs:
+  - job: Deploy
+    displayName: Deploy BFF Container
+    steps:
     - script: |
-        docker run --name $(containerName) -d luisgontarski/projeto-aula-devops:$(Build.BuildId)
-      displayName: 'Run BFF container crud-cloud'
+        echo "Deploying BFF container to Azure Container Apps..."
+        az containerapp update \
+          --name $(containerName) \
+          --resource-group <resource-group-name> \
+          --image $(containerRegistry)/$(imageName):$(imageTag) \
+          --cpu 0.5 \
+          --memory 1Gi \
+          --env-vars PORT=3000  # Exemplo de variável de ambiente (ajustar conforme necessário)
+      displayName: 'Deploy to Azure Container Apps'
+
