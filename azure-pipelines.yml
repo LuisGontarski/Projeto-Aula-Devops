@@ -23,12 +23,12 @@ stages:
 
           - script: |
               npm install
-              npm run build  # Adapte se houver um script de build específico
-            displayName: 'Install Dependencies and Build'
+              npm run start  # Inicia a aplicação
+            displayName: 'Install Dependencies and Start Application'
 
           - task: Docker@2
             inputs:
-              containerRegistry: 'projeto-aula-devops-docker'  # Verifique se essa conexão está correta
+              containerRegistry: 'projeto-aula-devops-docker'  # Verifique se esta conexão está correta
               repository: '$(imageName)'
               command: 'buildAndPush'
               tags: '$(Build.BuildId)'
