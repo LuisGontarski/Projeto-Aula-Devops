@@ -15,17 +15,17 @@ stages:
           - task: Docker@2
             inputs:
               containerRegistry: 'projeto-aula-devops-docker'
-              repository: 'luisgontarski/projeto-aula-devops'
+              repository: 'luisgontarski/projeto-aula-devops' 
               command: 'buildAndPush'
               tags: '$(Build.BuildId)'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
 
           - task: AzureCLI@2
             inputs:
-              azureSubscription: 'myAzureServiceConnection'  # Conexão criada
+              azureSubscription: 'myAzureServiceConnection'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
                 echo "Deploying BFF container to Azure Container Apps..."
-                az containerapp up --name $(containerName) --resource-group luisedgon --image luisgontarski/projeto-aula-devops:$(Build.BuildId) --target-port 5000
+                az containerapp up --name $(containerName) --resource-group luisedgon --image luisgontarski/projeto-aula-devops:$(Build.BuildId) --target-port 3000
             displayName: 'Deploy to Azure Container Apps'
