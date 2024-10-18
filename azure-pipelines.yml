@@ -4,28 +4,43 @@ resources:
 variables:
   imagePullSecret: 'regcred'
   containerName: 'crud-cloud'
+  imageName: 'luisgontarski/projeto-aula-devops'  # Nome da imagem do BFF
 
 stages:
   - stage: Build
     displayName: Build stage
     jobs:
       - job: Build
-        displayName: Build
+        displayName: Build BFF
+        pool:
+          vmImage: 'ubuntu-latest'  # Imagem do agente
+
         steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'  # Versão do Node.js
+            displayName: 'Install Node.js'
+
+          - script: |
+              npm install
+              npm run start  # Inicia a aplicação
+            displayName: 'Install Dependencies and Start Application'
+
           - task: Docker@2
             inputs:
-              containerRegistry: 'projeto-aula-devops-docker'
-              repository: 'luisgontarski/projeto-aula-devops'
+              containerRegistry: 'projeto-aula-devops-docker'  # Verifique se esta conexão está correta
+              repository: '$(imageName)'
               command: 'buildAndPush'
               tags: '$(Build.BuildId)'
               Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              buildContext: '$(Build.SourcesDirectory)'
 
           - task: AzureCLI@2
             inputs:
-              azureSubscription: 'myAzureServiceConnection'  # Conexão criada
+              azureSubscription: 'myAzureServiceConnection'  # Verifique se essa conexão está configurada corretamente
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
                 echo "Deploying BFF container to Azure Container Apps..."
-                az containerapp up --name $(containerName) --resource-group luisedgon --image luisgontarski/projeto-aula-devops:$(Build.BuildId) --target-port 5000
+                az containerapp up --name $(containerName) --resource-group luisedgon --image $(imageName):$(Build.BuildId) --target-port 3000
             displayName: 'Deploy to Azure Container Apps'
