@@ -27,5 +27,5 @@ stages:
               scriptLocation: 'inlineScript'
               inlineScript: |
                 echo "Deploying BFF container to Azure Container Apps..."
-                az containerapp up --name $(containerName) --resource-group myResourceGroup --image luisgontarski/projeto-aula-devops:$(Build.BuildId) --target-port 5000
+                az containerapp up --name $(containerName) --resource-group luisedgon --image luisgontarski/projeto-aula-devops:$(Build.BuildId) --target-port 5000
             displayName: 'Deploy to Azure Container Apps'
