@@ -4,7 +4,7 @@ resources:
 variables:
   imagePullSecret: 'regcred'
   containerName: 'crud-cloud'
-  imageName: 'luisgontarski/projeto-aula-devops'  # Nome da imagem do BFF
+  imageName: 'luisgontarski/projeto-aula-devops' 
 
 stages:
   - stage: Build
@@ -13,12 +13,12 @@ stages:
       - job: Build
         displayName: Build BFF
         pool:
-          vmImage: 'ubuntu-latest'  # Imagem do agente
+          vmImage: 'ubuntu-latest'
 
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: '20.x'  # Versão do Node.js
+              versionSpec: '20.x' 
             displayName: 'Install Node.js'
 
           - script: |
@@ -28,7 +28,7 @@ stages:
 
           - task: Docker@2
             inputs:
-              containerRegistry: 'projeto-aula-devops-docker'  # Verifique se esta conexão está correta
+              containerRegistry: 'projeto-aula-devops-docker' 
               repository: '$(imageName)'
               command: 'buildAndPush'
               tags: '$(Build.BuildId)'
@@ -37,7 +37,7 @@ stages:
 
           - task: AzureCLI@2
             inputs:
-              azureSubscription: 'myAzureServiceConnection'  # Verifique se essa conexão está configurada corretamente
+              azureSubscription: 'myAzureServiceConnection'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
