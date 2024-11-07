@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copiar o restante dos arquivos da aplicação para o diretório de trabalho
-COPY . .
+COPY html/ /app/
 
 # Expor a porta que a aplicação vai usar (por exemplo, 3000)
 EXPOSE 3000

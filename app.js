@@ -1,49 +1,70 @@
+// app.js
 const express = require('express');
-const axios = require('axios');
-const db = require('./db'); // Importar a conexão com o banco de dados
 const app = express();
-
-// Middleware para analisar JSON no corpo da requisição
+const pool = require('./db');
 app.use(express.json());
-
-// URL da Azure Function e Microsserviço
-const AZURE_FUNCTION_URL = 'https://7n2b14zsc7.execute-api.us-east-2.amazonaws.com/lambda';
-const MICROSERVICE_URL = 'https://crud-croud.internal.wonderfulsmoke-a37fd7b3.australiaeast.azurecontainerapps.io';
-
-// Rota para lidar com requisições de reservas
-app.get('/api/reservas', async (req, res) => {
+// Criar uma nova reserva
+app.post('/reservas', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM reservas'); // Usar a conexão do db.js
-        res.json(result.rows); // Use result.rows para obter os dados
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar reservas' });
+        const { cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status } = req.body;
+        const novaReserva = await pool.query(
+            `INSERT INTO reservas (cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status) 
+       VALUES($1, $2, $3, $4, $5, $6) 
+       RETURNING *`,
+            [cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status]
+        );
+        res.json(novaReserva.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Erro ao criar a reserva' });
     }
 });
-
-// Rota do BFF para fazer requisições para o microsserviço e Azure Function
-app.get('/api/bff', async (req, res) => {
+// Listar todas as reservas
+app.get('/reservas', async (req, res) => {
     try {
-        // Requisição para o microsserviço
-        const microserviceResponse = await axios.get(`${MICROSERVICE_URL}/reservas`);
-        
-        // Requisição para a Azure Function
-        const azureFunctionResponse = await axios.get(AZURE_FUNCTION_URL);
-
-        // Resposta agregada para o frontend
-        const responseData = {
-            reservas: microserviceResponse.data,
-            functionData: azureFunctionResponse.data
-        };
-
-        res.status(200).json(responseData);
-    } catch (error) {
-        console.error('Erro no BFF:', error);
-        res.status(500).json({ error: 'Erro ao agregar dados do BFF' });
+        const todasReservas = await pool.query("SELECT * FROM reservas");
+        res.json(todasReservas.rows);
+    } catch (err) {
+        console.error(err.message);
     }
 });
-
-// Inicializar o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`BFF rodando na porta ${PORT}`);
+// Atualizar uma reserva
+app.put('/reservas/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status } = req.body;
+        const atualizarReserva = await pool.query(
+            `UPDATE reservas 
+       SET cliente_id = $1, vaga_id = $2, data_reserva = $3, 
+           data_inicio = $4, data_fim = $5, status = $6 
+       WHERE reserva_id = $7`,
+            [cliente_id, vaga_id, data_reserva, data_inicio, data_fim, status, id]
+        );
+        if (atualizarReserva.rowCount > 0) {
+            res.json("Reserva atualizada com sucesso!");
+        } else {
+            res.status(404).json({ message: "Reserva não encontrada" });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Erro ao atualizar a reserva" });
+    }
+});
+// Deletar uma reserva
+app.delete('/reservas/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletarReserva = await pool.query("DELETE FROM reservas WHERE reserva_id = $1", [id]);
+        if (deletarReserva.rowCount > 0) {
+            res.json("Reserva deletada com sucesso!");
+        } else {
+            res.status(404).json({ message: "Reserva não encontrada" });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Erro ao deletar a reserva" });
+    }
+});
+app.listen(5000, () => {
+    console.log('Servidor rodando na porta 5000');
 });
