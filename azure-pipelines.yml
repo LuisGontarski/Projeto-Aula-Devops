@@ -4,7 +4,7 @@ resources:
 variables:
   imagePullSecret: 'regcred'
   containerName: 'crud-cloud'
-  imageName: 'luisgontarski/projeto-aula-devops' 
+  imageName: 'luisgontarskiacr.azurecr.io/projeto-aula-devops'
 
 stages:
   - stage: Build
@@ -18,13 +18,12 @@ stages:
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: '20.x' 
+              versionSpec: '20.x'
             displayName: 'Install Node.js'
 
           - script: |
               npm install
-              npm run start  # Inicia a aplicação
-            displayName: 'Install Dependencies and Start Application'
+            displayName: 'Install Dependencies'
 
           - task: Docker@2
             inputs:
@@ -42,5 +41,5 @@ stages:
               scriptLocation: 'inlineScript'
               inlineScript: |
                 echo "Deploying BFF container to Azure Container Apps..."
-                az containerapp up --name $(containerName) --resource-group luisedgon --image $(imageName):$(Build.BuildId) --target-port 3000
+                az containerapp up --name $(containerName) --resource-group luisedgon --image $(imageName):$(Build.BuildId) --target-port 8080
             displayName: 'Deploy to Azure Container Apps'
