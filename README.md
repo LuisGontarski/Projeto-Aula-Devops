@@ -52,54 +52,47 @@ Este sistema foi projetado para gerenciar playlists de música para usuários da
 
 ## C4 Model - Level 1 (Contexto do Sistema)
 ´´´mermaid
-C4Container
+C4Context
 
-title Diagrama de Container para o Sistema de Gerenciamento de Playlists
+title Diagrama de Contexto do Sistema de Gerenciamento de Playlists
 
-System_Ext(email_system, "Sistema de Notificações por E-mail", "Sistema interno de notificações via e-mail", $tags="v1.0")
+Enterprise_Boundary(b0, "Limite do Serviço de Streaming") {
 
-Person(user, Usuário, "Um usuário da plataforma de streaming que cria, gerencia e escuta playlists", $tags="v1.0")
+  Person(user, "Usuário do Spotify", "Um usuário da plataforma que cria, gerencia e escuta playlists.")
 
-Container_Boundary(c1, "Sistema de Streaming de Música") {
+  System(playlistSystem, "Sistema de Gerenciamento de Playlists", "Permite que os usuários criem, visualizem, editem e excluam playlists com suas músicas favoritas.")
 
-  Container(web_app, "Aplicação Web", "JavaScript, React", "Permite ao usuário gerenciar playlists e acessar conteúdo musical via navegador")
+  Enterprise_Boundary(b1, "Backend do Spotify") {
 
-  Container_Ext(mobile_app, "Aplicativo Móvel", "Kotlin, Swift", "Oferece funcionalidades de gerenciamento de playlists e reprodução para dispositivos móveis")
+    SystemDb_Ext(mainMusicDatabase, "Banco de Dados Principal de Músicas", "Armazena todas as informações principais sobre músicas, álbuns e artistas disponíveis na plataforma.")
+    
+    System_Boundary(b2, "Limite de Gerenciamento de Usuários") {
+      System(userAuthSystem, "Sistema de Autenticação de Usuários", "Gerencia o login de usuários e controle de acesso.")
+      System(userProfileSystem, "Sistema de Perfil de Usuários", "Armazena dados específicos do usuário, como preferências e metadados das playlists.")
+    }
 
-  Container(playlist_service, "Serviço de Gerenciamento de Playlists", "Java, Spring Boot", "Gerencia a criação, atualização e exclusão de playlists e a adição de músicas")
-
-  ContainerDb(database, "Banco de Dados de Playlists", "PostgreSQL", "Armazena informações sobre playlists, incluindo músicas, metadata e preferências dos usuários")
-
-  Container(api_gateway, "API Gateway", "NGINX, Docker", "Controla o tráfego de API e roteia solicitações para serviços backend apropriados")
-
+    System_Ext(emailSystem, "Sistema de Notificações por E-mail", "Envia notificações para os usuários quando as playlists são modificadas.")
+    
+    Boundary(b3, "Limite de Streaming de Músicas", "limite") {
+      SystemQueue(playbackQueue, "Fila de Reprodução de Músicas", "Gerencia solicitações de streaming de músicas.")
+      SystemQueue_Ext(eventQueue, "Fila de Registro de Eventos", "Registra ações dos usuários, como edições de playlists para análise e personalização.")
+    }
+  }
 }
 
-System_Ext(music_catalog, "Catálogo de Músicas", "Armazena informações sobre músicas, álbuns e artistas disponíveis na plataforma")
+BiRel(user, playlistSystem, "Usa")
+BiRel(playlistSystem, mainMusicDatabase, "Busca metadados das músicas")
+Rel(playlistSystem, emailSystem, "Envia notificações", "SMTP")
+Rel(emailSystem, user, "Envia e-mails para")
 
-Rel(user, web_app, "Usa", "HTTPS")
-UpdateRelStyle(user, web_app, $offsetY="50", $offsetX="80")
-
-Rel(user, mobile_app, "Usa", "HTTPS")
-UpdateRelStyle(user, mobile_app, $offsetY="-40")
-
-Rel(web_app, api_gateway, "Faz solicitações para")
-
-Rel(mobile_app, api_gateway, "Faz solicitações para")
-
-Rel(api_gateway, playlist_service, "Roteia solicitações para", "JSON/HTTPS")
-
-Rel(playlist_service, database, "Lê e escreve em", "sync, JDBC")
-
-Rel(playlist_service, email_system, "Envia notificações para", "sync, SMTP")
-UpdateRelStyle(playlist_service, email_system, $offsetY="-50")
-
-Rel(playlist_service, music_catalog, "Consulta informações de músicas", "async, REST API")
-UpdateRelStyle(playlist_service, music_catalog, $offsetX="-120")
-
-Rel(email_system, user, "Envia e-mails para")
-UpdateRelStyle(email_system, user, $offsetX="-50")
+UpdateElementStyle(user, $fontColor="black", $bgColor="lightyellow", $borderColor="black")
+UpdateRelStyle(user, playlistSystem, $textColor="green", $lineColor="green", $offsetX="5")
+UpdateRelStyle(playlistSystem, mainMusicDatabase, $textColor="blue", $lineColor="blue", $offsetY="-10")
+UpdateRelStyle(playlistSystem, emailSystem, $textColor="blue", $lineColor="blue", $offsetY="-40", $offsetX="-50")
+UpdateRelStyle(emailSystem, user, $textColor="purple", $lineColor="purple", $offsetX="-50", $offsetY="20")
 
 UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+
 ´´´
 ----------
 
