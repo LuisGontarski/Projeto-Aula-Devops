@@ -290,8 +290,8 @@ C4Component
     UpdateRelStyle(deletarPlaylist, servicoPlaylist, $offsetY="-10")
 ```
 ## System Design
-	```mermaid
-	graph TD
+```mermaid
+graph TD
 
     %% Frontend
     subgraph Frontend
@@ -333,6 +333,4 @@ C4Component
     %% Estilos e aparência
     classDef default  fill:#f9,stroke:#333,stroke-width:4px;
     class FrontendApp,API,API_Gateway,PlaylistCommand,PlaylistQuery,MusicQuery,PlaylistService,MusicService default;
-
-
-
+```
