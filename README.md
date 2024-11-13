@@ -174,8 +174,9 @@ Este sistema foi projetado para gerenciar playlists de música para usuários da
 -   **CQRS (Command Query Responsibility Segregation):** para otimizar comandos de criação e atualização, e consultas de leitura.
 ---
 ## Diagrama de Classes
-	classDiagram
-	    note "Diagrama de Classe com Vertical Slice e Clean Architecture"
+```mermaid
+classDiagram
+    note "Diagrama de Classe com Vertical Slice e Clean Architecture"
 
     class Playlist {
         +UUID id
@@ -248,6 +249,7 @@ Este sistema foi projetado para gerenciar playlists de música para usuários da
     PlaylistService --> ObterPlaylistUseCase : Usa
     PlaylistService --> AtualizarPlaylistUseCase : Usa
     PlaylistService --> DeletarPlaylistUseCase : Usa
+```
 ---
 ## Diagrama de Componentes
 ```mermaid
