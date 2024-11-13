@@ -295,42 +295,43 @@ graph TD
 
     %% Frontend
     subgraph Frontend
-        FrontendApp[App Web/Mobile]  -->|Requisições HTTP|  API[API Gateway]
+        FrontendApp[App Web/Mobile] -->|Requisições HTTP| API[API Gateway]
     end
 
     %% API Gateway
-    subgraph API_Gateway  [API Gateway]
-        API  -->|Redireciona para|  PlaylistCommand[Serviço de Comandos - Playlist]
-        API  -->|Redireciona para|  PlaylistQuery[Serviço de Consultas - Playlist]
-        API  -->|Redireciona para|  MusicQuery[Serviço de Consultas - Música]
+    subgraph API_Gateway [API Gateway]
+        API -->|Redireciona para| PlaylistCommand[Serviço de Comandos - Playlist]
+        API -->|Redireciona para| PlaylistQuery[Serviço de Consultas - Playlist]
+        API -->|Redireciona para| MusicQuery[Serviço de Consultas - Música]
     end
 
     %% Microservices de Playlist e Música
-    subgraph PlaylistService  [Microservice de Playlist]
-        PlaylistCommand  -->|Cria/Atualiza/Deleta|  PlaylistDB[Banco de Dados da Playlist]
-        PlaylistQuery  -->|Consulta|  PlaylistReadDB[Banco de Dados de Leitura da Playlist]
+    subgraph PlaylistService [Microservice de Playlist]
+        PlaylistCommand -->|Cria/Atualiza/Deleta| PlaylistDB[Banco de Dados da Playlist]
+        PlaylistQuery -->|Consulta| PlaylistReadDB[Banco de Dados de Leitura da Playlist]
     end
 
-    subgraph MusicService  [Microservice de Música]
-        MusicQuery  -->|Consulta|  MusicDB[Banco de Dados de Música]
+    subgraph MusicService [Microservice de Música]
+        MusicQuery -->|Consulta| MusicDB[Banco de Dados de Música]
     end
 
     %% Persistência
-    subgraph Persistencia  [Persistência]
-        PlaylistDB  -->|Armazena Dados|  PlaylistData[Dados de Playlist]
-        PlaylistReadDB  -->|Armazena Dados de Leitura|  PlaylistReadData[Dados de Leitura da Playlist]
-        MusicDB  -->|Armazena Dados|  MusicData[Dados de Música]
+    subgraph Persistencia [Persistência]
+        PlaylistDB -->|Armazena Dados| PlaylistData[Dados de Playlist]
+        PlaylistReadDB -->|Armazena Dados de Leitura| PlaylistReadData[Dados de Leitura da Playlist]
+        MusicDB -->|Armazena Dados| MusicData[Dados de Música]
     end
 
     %% Comunicação entre Microservices
-    PlaylistCommand  -->|Comando|  MusicDB
-    MusicQuery  -->|Consulta|  PlaylistReadDB
+    PlaylistCommand -->|Comando| MusicDB
+    MusicQuery -->|Consulta| PlaylistReadDB
 
     %% Comunicação externa
-    SystemDB[Spotify Main Database]  -->|Interage com|  PlaylistDB
-    SystemDB  -->|Interage com|  MusicDB
+    SystemDB[Spotify Main Database] -->|Interage com| PlaylistDB
+    SystemDB -->|Interage com| MusicDB
 
     %% Estilos e aparência
-    classDef default  fill:#f9,stroke:#333,stroke-width:4px;
+    classDef default fill:#f9,stroke:#333,stroke-width:4px;
     class FrontendApp,API,API_Gateway,PlaylistCommand,PlaylistQuery,MusicQuery,PlaylistService,MusicService default;
+
 ```
