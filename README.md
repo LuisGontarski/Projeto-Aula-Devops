@@ -51,7 +51,7 @@ Este sistema foi projetado para gerenciar playlists de música para usuários da
 ----------
 
 ## C4 Model - Level 1 (Contexto do Sistema)
-´´´mermaid
+```mermaid
 C4Context
 
 title Diagrama de Contexto do Sistema de Gerenciamento de Playlists
@@ -92,8 +92,7 @@ UpdateRelStyle(playlistSystem, emailSystem, $textColor="blue", $lineColor="blue"
 UpdateRelStyle(emailSystem, user, $textColor="purple", $lineColor="purple", $offsetX="-50", $offsetY="20")
 
 UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
-
-´´´
+```
 ----------
 
 ## C4 Model - Level 2 (Container do Sistema)
