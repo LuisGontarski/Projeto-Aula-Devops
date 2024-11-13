@@ -99,73 +99,56 @@ Este sistema foi projetado para gerenciar playlists de música para usuários da
 ----------
 
 ## C4 Model - Level 2 (Container do Sistema)
+```mermaid
+C4Container
 
+title Diagrama de Container para o Sistema de Gerenciamento de Playlists
 
-	C4Container
+System_Ext(email_system, "Sistema de Notificações por E-mail", "Sistema interno de notificações via e-mail", $tags="v1.0")
 
-	title Diagrama de Container para o Sistema de Gerenciamento de Playlists
+Person(user, Usuário, "Um usuário da plataforma de streaming que cria, gerencia e escuta playlists", $tags="v1.0")
 
-	  
+Container_Boundary(c1, "Sistema de Streaming de Música") {
 
-	System_Ext(email_system, "Sistema de Notificações por E-mail", "Sistema interno de notificações via e-mail", $tags="v1.0")
+  Container(web_app, "Aplicação Web", "JavaScript, React", "Permite ao usuário gerenciar playlists e acessar conteúdo musical via navegador")
 
-	Person(user, Usuário, "Um usuário da plataforma de streaming que cria, gerencia e escuta playlists", $tags="v1.0")
+  Container_Ext(mobile_app, "Aplicativo Móvel", "Kotlin, Swift", "Oferece funcionalidades de gerenciamento de playlists e reprodução para dispositivos móveis")
 
-	  
+  Container(playlist_service, "Serviço de Gerenciamento de Playlists", "Java, Spring Boot", "Gerencia a criação, atualização e exclusão de playlists e a adição de músicas")
 
-	Container_Boundary(c1, "Sistema de Streaming de Música") {
+  ContainerDb(database, "Banco de Dados de Playlists", "PostgreSQL", "Armazena informações sobre playlists, incluindo músicas, metadata e preferências dos usuários")
 
-	Container(web_app, "Aplicação Web", "JavaScript, React", "Permite ao usuário gerenciar playlists e acessar conteúdo musical via navegador")
+  Container(api_gateway, "API Gateway", "NGINX, Docker", "Controla o tráfego de API e roteia solicitações para serviços backend apropriados")
 
-	Container_Ext(mobile_app, "Aplicativo Móvel", "Kotlin, Swift", "Oferece funcionalidades de gerenciamento de playlists e reprodução para dispositivos móveis")
+}
 
-	Container(playlist_service, "Serviço de Gerenciamento de Playlists", "Java, Spring Boot", "Gerencia a criação, atualização e exclusão de playlists e a adição de músicas")
+System_Ext(music_catalog, "Catálogo de Músicas", "Armazena informações sobre músicas, álbuns e artistas disponíveis na plataforma")
 
-	ContainerDb(database, "Banco de Dados de Playlists", "PostgreSQL", "Armazena informações sobre playlists, incluindo músicas, metadata e preferências dos usuários")
+Rel(user, web_app, "Usa", "HTTPS")
+UpdateRelStyle(user, web_app, $offsetY="50", $offsetX="80")
 
-	Container(api_gateway, "API Gateway", "NGINX, Docker", "Controla o tráfego de API e roteia solicitações para serviços backend apropriados")
+Rel(user, mobile_app, "Usa", "HTTPS")
+UpdateRelStyle(user, mobile_app, $offsetY="-40")
 
-	}
+Rel(web_app, api_gateway, "Faz solicitações para")
 
-	  
+Rel(mobile_app, api_gateway, "Faz solicitações para")
 
-	System_Ext(music_catalog, "Catálogo de Músicas", "Armazena informações sobre músicas, álbuns e artistas disponíveis na plataforma")
+Rel(api_gateway, playlist_service, "Roteia solicitações para", "JSON/HTTPS")
 
-	  
+Rel(playlist_service, database, "Lê e escreve em", "sync, JDBC")
 
-	Rel(user, web_app, "Usa", "HTTPS")
+Rel(playlist_service, email_system, "Envia notificações para", "sync, SMTP")
+UpdateRelStyle(playlist_service, email_system, $offsetY="-50")
 
-	UpdateRelStyle(user, web_app, $offsetY="50", $offsetX="80")
+Rel(playlist_service, music_catalog, "Consulta informações de músicas", "async, REST API")
+UpdateRelStyle(playlist_service, music_catalog, $offsetX="-120")
 
-	Rel(user, mobile_app, "Usa", "HTTPS")
+Rel(email_system, user, "Envia e-mails para")
+UpdateRelStyle(email_system, user, $offsetX="-50")
 
-	UpdateRelStyle(user, mobile_app, $offsetY="-40")
-
-	Rel(web_app, api_gateway, "Faz solicitações para")
-
-	Rel(mobile_app, api_gateway, "Faz solicitações para")
-
-	  
-
-	Rel(api_gateway, playlist_service, "Roteia solicitações para", "JSON/HTTPS")
-
-	Rel(playlist_service, database, "Lê e escreve em", "sync, JDBC")
-
-	  
-
-	Rel(playlist_service, email_system, "Envia notificações para", "sync, SMTP")
-
-	UpdateRelStyle(playlist_service, email_system, $offsetY="-50")
-
-	Rel(playlist_service, music_catalog, "Consulta informações de músicas", "async, REST API")
-
-	UpdateRelStyle(playlist_service, music_catalog, $offsetX="-120")
-
-	Rel(email_system, user, "Envia e-mails para")
-
-	UpdateRelStyle(email_system, user, $offsetX="-50")
-
-	UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
 ---
 ## Padrões Arquiteturais
 
